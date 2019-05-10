@@ -38,7 +38,7 @@ public class GCSContentWriter extends AbstractContentWriter
     {
         return size;
     }
-    
+
     public void setSize(long size)
     {
         this.size = size;
@@ -63,14 +63,11 @@ public class GCSContentWriter extends AbstractContentWriter
         {
             throw new ContentIOException("could not open write channel, sorry", e);
         }
-
     }
-    
+
     /*
      * Getters and setters
      */
-    
-
     public String getPath()
     {
         return path;

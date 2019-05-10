@@ -9,7 +9,9 @@ import java.util.GregorianCalendar;
 import org.alfresco.repo.content.AbstractContentStore;
 import org.alfresco.repo.content.ContentStore;
 import org.alfresco.repo.content.filestore.FileContentStore;
+import org.alfresco.service.cmr.repository.ContentIOException;
 import org.alfresco.service.cmr.repository.ContentReader;
+import org.alfresco.service.cmr.repository.ContentWriter;
 import org.alfresco.util.GUID;
 import org.alfresco.util.Pair;
 import org.apache.commons.lang3.StringUtils;
@@ -92,10 +94,9 @@ public class GCSContentStore extends AbstractContentStore
         {
             LOG.debug("projectId: " + projectId);
         }
-        GoogleCredentials credentials;
         try
         {
-            credentials = GoogleCredentials.fromStream(GCSContentStore.class.getClassLoader().getResourceAsStream(keyPath));
+            GoogleCredentials credentials = GoogleCredentials.fromStream(GCSContentStore.class.getClassLoader().getResourceAsStream(keyPath));
             Storage storage = StorageOptions.newBuilder().setCredentials(credentials).setProjectId(projectId).build().getService();
             this.bucket = storage.get(bucketName);
         }

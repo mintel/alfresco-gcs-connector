@@ -1,15 +1,18 @@
 package com.mintel.gcs;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.nio.channels.Channels;
+import java.nio.channels.WritableByteChannel;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.alfresco.service.cmr.repository.ContentReader;
+import org.alfresco.service.cmr.repository.ContentWriter;
 
 import com.google.auth.oauth2.GoogleCredentials;
-import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.Bucket;
 import com.google.cloud.storage.Storage;
-import com.google.cloud.storage.Storage.BlobGetOption;
-import com.google.cloud.storage.Storage.BlobListOption;
 import com.google.cloud.storage.StorageOptions;
 
 public class Main
@@ -17,41 +20,81 @@ public class Main
 
     public static void main(String[] args) throws Exception
     {
+        /*
+         * Init
+         */
         InputStream is = Main.class.getClassLoader().getResourceAsStream("key.json");
         GoogleCredentials credentials = GoogleCredentials.fromStream(is);
         Storage storage = StorageOptions.newBuilder().setCredentials(credentials).setProjectId("***REMOVED***").build().getService();
-        System.out.println(storage.get("***REMOVED***"));
-
         Bucket bucket = storage.get("***REMOVED***");
+        GCSContentStore store = new GCSContentStore("key.json", "***REMOVED***", "");
         System.out.println(bucket);
-        BlobGetOption BLOB_FIELDS = BlobGetOption.fields(
-            Storage.BlobField.UPDATED,
-            Storage.BlobField.SIZE
-        );
-        for (Blob b : bucket.list().getValues())
+
+        /*
+         * WRITING
+         */
+
+        int numberOfFiles = 10000;
+
+        Set<String> files = new HashSet<String>();
+        for (int i = 0; i < numberOfFiles; i++)
         {
-            System.out.println(b.getName());
+            files.add(store.getPath(GCSContentStore.createNewUrl()));
         }
-        Blob metadata = bucket.get("hi/sam.txt", BLOB_FIELDS);
-        System.out.println(metadata);
-        System.out.println(metadata.exists());
-        System.out.println(metadata.getUpdateTime());
-        System.out.println(metadata.getSize());
-        is = Channels.newInputStream(metadata.reader());
-        int a;
-        while (true)
+        System.out.println("Starting write....");
+        long startTime = System.currentTimeMillis();
+
+        files.parallelStream().forEach((filename) ->
         {
-            a = is.read();
-            if (a != -1)
+            ContentReader reader = store.getReader("gs://parallel/" + filename);
+            ContentWriter writer = store.getWriterInternal(reader, "gs://parallel/" + filename);
+            WritableByteChannel channel = writer.getWritableChannel();
+            try
             {
-                System.out.print((char) a);
+                channel.write(ByteBuffer.wrap(filename.getBytes()));
+                channel.close();
             }
-            else
+            catch (IOException e)
             {
-                break;
+                e.printStackTrace();
             }
-        }
-        is.close();
+        });
+
+        long timeElapsed = System.currentTimeMillis() - startTime;
+        System.out.println("Execution time in milliseconds  : " + timeElapsed);
+        System.out.println("\tTime elapsed per file: " + (timeElapsed / files.size()) + "ms");
+
+        startTime = System.currentTimeMillis();
+
+        files.parallelStream().forEach((filename) ->
+        {
+            ContentReader reader = store.getReader("gs://parallel/" + filename);
+            /*System.out.println("Exists: " + reader.exists());
+            System.out.println("Last modified: " + reader.getLastModified());
+            System.out.println("Size: " + reader.getSize());*/
+            System.out.println("Content: " + reader.getContentString());
+        });
+
+        timeElapsed = System.currentTimeMillis() - startTime;
+        System.out.println("Execution time in milliseconds  : " + timeElapsed);
+        System.out.println("\tTime elapsed per file: " + (timeElapsed / files.size()) + "ms");
+
+        /* ContentReader reader = store.getReader("gs://hi/sam.txt");
+        ContentWriter writer = store.getWriterInternal(reader, "gs://hi/sam.txt");
+        WritableByteChannel channel = writer.getWritableChannel();
+        
+        String emoji = "☊☋☌☍☎☏☐☑☒☓☔☕☖☗☘☙☚☛☜☝☞☟☠☡☢☣☤☥☦☧☨☩☪☫☬☭☮☯☰☱☲☳☴☵☶☷☸☹☺☻☼☽☾☿♀♁♂♃♄♅♆♇♈♉♊♋♌♍♎♏♐♑♒♓♔♕♖♗♘♙♚♛♜♝♞♟♠♡♢♣♤♥♦♧♨♩♪♫♬♭♮♯≰≱≲≳≴≵≶≷≸≹≺≻≼≽≾≿⊀⊁⊂⊃⊄⊅⊆⊇⊈⊉⊊⊋⊌⊍⊎⊏⊐⊑⊒⊓⊔⊕⊖⊗⊘⊙⊚⊛⊜⊝⊞⊟⊠⊡⊢⊣⊤⊥⊦⊧⊨⊩⊪⊫⊬⊭⊮⊯⊰⊱⊲⊳⊴⊵⊶⊷⊸⊹";
+        
+        channel.write(ByteBuffer.wrap(emoji.getBytes()));
+        channel.close();
+        
+        
+         * READING
+         
+        System.out.println("Exists: " + reader.exists());
+        System.out.println("Last modified: " + reader.getLastModified());
+        System.out.println("Size: " + reader.getSize());
+        System.out.println("Content: " + reader.getContentString());*/
     }
 
 }
