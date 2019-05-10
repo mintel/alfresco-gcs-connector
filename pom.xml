@@ -4,11 +4,30 @@
    <artifactId>alfresco-gcs-connector</artifactId>
    <version>0.0.1-SNAPSHOT</version>
 
+   <scm>
+      <url>https://github.com:amgouveia/alfresco-gcs-connector.git</url>
+      <connection>scm:git@github.com:amgouveia/alfresco-gcs-connector.git</connection>
+      <tag>HEAD</tag>
+      <developerConnection>scm:git:git@github.com:amgouveia/alfresco-gcs-connector.git</developerConnection>
+   </scm>
+
+   <properties>
+      <alfresco.groupId>org.alfresco</alfresco.groupId>
+      <alfresco.version>5.0.4</alfresco.version>
+   </properties>
+
    <dependencies>
       <dependency>
          <groupId>com.google.cloud</groupId>
          <artifactId>google-cloud-storage</artifactId>
          <version>1.73.0</version>
+      </dependency>
+
+      <dependency>
+         <groupId>${alfresco.groupId}</groupId>
+         <artifactId>alfresco-repository</artifactId>
+         <version>${alfresco.version}</version>
+         <scope>provided</scope>
       </dependency>
    </dependencies>
 

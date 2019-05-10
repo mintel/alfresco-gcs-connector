@@ -1,32 +1,18 @@
 package main.java.com.mintel.gcs;
 
-import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.WritableByteChannel;
 
-import org.alfresco.repo.content.AbstractContentReader;
+import org.alfresco.repo.content.AbstractContentWriter;
 import org.alfresco.service.cmr.repository.ContentIOException;
 import org.alfresco.service.cmr.repository.ContentReader;
 
-public class GCSContentReader extends AbstractContentReader
+public class GCSContentWriter extends AbstractContentWriter
 {
 
-    protected GCSContentReader(String contentUrl)
+    protected GCSContentWriter(String contentUrl, ContentReader existingContentReader)
     {
-        super(contentUrl);
+        super(contentUrl, existingContentReader);
         // TODO Auto-generated constructor stub
-    }
-
-    @Override
-    public boolean exists()
-    {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public long getLastModified()
-    {
-        // TODO Auto-generated method stub
-        return 0;
     }
 
     @Override
@@ -44,7 +30,7 @@ public class GCSContentReader extends AbstractContentReader
     }
 
     @Override
-    protected ReadableByteChannel getDirectReadableChannel() throws ContentIOException
+    protected WritableByteChannel getDirectWritableChannel() throws ContentIOException
     {
         // TODO Auto-generated method stub
         return null;
