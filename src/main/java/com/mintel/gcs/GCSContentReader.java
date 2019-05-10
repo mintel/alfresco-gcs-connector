@@ -6,48 +6,74 @@ import org.alfresco.repo.content.AbstractContentReader;
 import org.alfresco.service.cmr.repository.ContentIOException;
 import org.alfresco.service.cmr.repository.ContentReader;
 
+import com.google.cloud.storage.Blob;
+import com.google.cloud.storage.Bucket;
+import com.google.cloud.storage.Storage;
+import com.google.cloud.storage.Storage.BlobGetOption;
+
 public class GCSContentReader extends AbstractContentReader
 {
+    private static BlobGetOption BLOB_FIELDS = BlobGetOption.fields(
+        Storage.BlobField.UPDATED,
+        Storage.BlobField.SIZE
+    );
+    
+    private String path;
+    private String contentUrl;
+    private Bucket bucket;
+    
+    private Blob metadata = null;
 
-    protected GCSContentReader(String contentUrl)
+    protected GCSContentReader(String path, String contentUrl, Bucket bucket)
     {
         super(contentUrl);
-        // TODO Auto-generated constructor stub
+        this.path = path;
+        this.contentUrl = contentUrl;
+        this.bucket = bucket;
     }
 
     @Override
     public boolean exists()
     {
-        // TODO Auto-generated method stub
-        return false;
+        Blob metadata = getMetadata();
+        return metadata != null && metadata.exists();
     }
 
     @Override
     public long getLastModified()
     {
-        // TODO Auto-generated method stub
-        return 0;
+        return getMetadata().getUpdateTime();
     }
 
     @Override
     public long getSize()
     {
-        // TODO Auto-generated method stub
-        return 0;
+        return getMetadata().getSize();
     }
 
     @Override
     protected ContentReader createReader() throws ContentIOException
     {
-        // TODO Auto-generated method stub
-        return null;
+        return new GCSContentReader(path, contentUrl, bucket);
     }
 
     @Override
     protected ReadableByteChannel getDirectReadableChannel() throws ContentIOException
     {
-        // TODO Auto-generated method stub
-        return null;
+        return bucket.get(path).reader();
+    }
+    
+    /**
+     * gets blob with just required metadata (size and last modified date)
+     * @return Blob containing only these fields
+     */
+    private Blob getMetadata()
+    {
+        if (metadata == null)
+        {
+            metadata = bucket.get(path, BLOB_FIELDS);
+        }
+        return metadata;
     }
 
 }
