@@ -13,7 +13,7 @@ import com.google.cloud.storage.Storage.BlobGetOption;
 
 public class GCSContentReader extends AbstractContentReader
 {
-    private static BlobGetOption BLOB_FIELDS = BlobGetOption.fields(
+    private static BlobGetOption METADATA_FIELDS = BlobGetOption.fields(
         Storage.BlobField.UPDATED,
         Storage.BlobField.SIZE
     );
@@ -42,13 +42,15 @@ public class GCSContentReader extends AbstractContentReader
     @Override
     public long getLastModified()
     {
-        return getMetadata().getUpdateTime();
+        Blob metadata = getMetadata();
+        return metadata == null ? 0L : metadata.getUpdateTime();
     }
 
     @Override
     public long getSize()
     {
-        return getMetadata().getSize();
+        Blob metadata = getMetadata();
+        return metadata == null ? 0L : metadata.getSize();
     }
 
     @Override
@@ -71,7 +73,7 @@ public class GCSContentReader extends AbstractContentReader
     {
         if (metadata == null)
         {
-            metadata = bucket.get(path, BLOB_FIELDS);
+            metadata = bucket.get(path, METADATA_FIELDS);
         }
         return metadata;
     }
