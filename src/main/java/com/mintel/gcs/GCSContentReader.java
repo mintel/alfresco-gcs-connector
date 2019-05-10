@@ -62,7 +62,18 @@ public class GCSContentReader extends AbstractContentReader
     @Override
     protected ReadableByteChannel getDirectReadableChannel() throws ContentIOException
     {
-        return bucket.get(path).reader();
+        if (!exists())
+        {
+            throw new ContentIOException("file doesn't exist");
+        }
+        try
+        {
+            return bucket.get(path).reader();
+        }
+        catch (Exception e)
+        {
+            throw new ContentIOException("could not read", e);
+        }
     }
     
     /**
