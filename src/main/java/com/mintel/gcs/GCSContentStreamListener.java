@@ -1,4 +1,4 @@
-package main.java.com.mintel.gcs;
+package com.mintel.gcs;
 
 import org.alfresco.service.cmr.repository.ContentIOException;
 import org.alfresco.service.cmr.repository.ContentStreamListener;
