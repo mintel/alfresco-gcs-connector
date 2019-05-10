@@ -23,27 +23,52 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+
 public class GCSContentStore extends AbstractContentStore
 {
     private Bucket bucket;
     private String rootDir;
     private static final Log logger = LogFactory.getLog(GCSContentStore.class);
 
-    public GCSContentStore(String keyFileName, String bucketName, String rootDir) throws IOException, ParseException
+    /**
+     * 
+     * @param keyFileName filename of the storage key
+     * @param bucketName The name of the bucket
+     * @param rootDir The root directory of the files in the bucket
+     */
+    public GCSContentStore(String keyFileName, String bucketName, String rootDir)
     {
         this.rootDir = rootDir;
-        String keyPath = "alfresco/extension/" + keyFileName;
+        //String keyPath = "alfresco/extension/" + keyFileName;
+        String keyPath = keyFileName;
         InputStream is = GCSContentStore.class.getClassLoader().getResourceAsStream(keyPath);
         JSONParser jsonParser = new JSONParser();
-        JSONObject jsonObject = (JSONObject) jsonParser.parse(new InputStreamReader(is, "UTF-8"));
+        JSONObject jsonObject;
+        try
+        {
+            jsonObject = (JSONObject) jsonParser.parse(new InputStreamReader(is, "UTF-8"));
+        }
+        catch (IOException | ParseException e)
+        {
+            logger.error("Error parsing the JSON in the key", e);
+            return;
+        }
         String projectId = (String) jsonObject.get("project_id");
         if (StringUtils.isBlank(projectId))
         {
-            //throw error
+            logger.error("Error in getting the project_id from key file");
         }
-        GoogleCredentials credentials = GoogleCredentials.fromStream(is);
-        Storage storage = StorageOptions.newBuilder().setCredentials(credentials).setProjectId(projectId).build().getService();
-        this.bucket = storage.get(bucketName);
+        GoogleCredentials credentials;
+        try
+        {
+            credentials = GoogleCredentials.fromStream(GCSContentStore.class.getClassLoader().getResourceAsStream(keyPath));
+            Storage storage = StorageOptions.newBuilder().setCredentials(credentials).setProjectId(projectId).build().getService();
+            this.bucket = storage.get(bucketName);
+        }
+        catch (IOException e)
+        {
+            logger.error("Error in reading credentials from the file", e);
+        }
     }
 
     @Override
@@ -55,7 +80,7 @@ public class GCSContentStore extends AbstractContentStore
     @Override
     public ContentReader getReader(String contentUrl)
     {
-        return new GCSContentReader(contentUrl);
+        return new GCSContentReader(getPath(contentUrl), contentUrl, bucket);
     }
 
     /**
@@ -74,17 +99,30 @@ public class GCSContentStore extends AbstractContentStore
         int minute = calendar.get(Calendar.MINUTE);
         // create the URL
         StringBuilder sb = new StringBuilder(20);
-        sb.append(FileContentStore.STORE_PROTOCOL).append(ContentStore.PROTOCOL_DELIMITER).append(year).append('/').append(month).append('/').append(day).append('/').append(hour).append('/').append(minute).append('/').append(GUID.generate()).append(".bin");
+        sb.append(FileContentStore.STORE_PROTOCOL).append(ContentStore.PROTOCOL_DELIMITER);
+        sb.append(year).append('/').append(month).append('/').append(day);
+        sb.append('/').append(hour).append('/').append(minute);
+        sb.append('/').append(GUID.generate()).append(".bin");
         String newContentUrl = sb.toString();
         // done
         return newContentUrl;
     }
 
-    public String getRelativePath(String contentUrl)
+    /**
+     * Extracts the path from the provided contentURL
+     * <p>
+     * @param contentUrl The url of the file
+     * @return The path for the file
+     * @see org.alfresco.repo.content.AbstractContentStore#getContentUrlParts
+     */
+    public String getPath(String contentUrl)
     {
         Pair<String, String> urlParts = super.getContentUrlParts(contentUrl);
-        String protocol = urlParts.getFirst();
         String relativePath = urlParts.getSecond();
-        return this.rootDir + '/' + relativePath;
+        if (StringUtils.isBlank(this.rootDir))
+        {
+            return relativePath;
+        }
+        return this.rootDir + "/" + relativePath;
     }
 }
