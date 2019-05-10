@@ -1,5 +1,11 @@
 package com.mintel.gcs;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+
 import org.alfresco.repo.content.AbstractContentStore;
 import org.alfresco.repo.content.ContentStore;
 import org.alfresco.repo.content.filestore.FileContentStore;
@@ -18,30 +24,55 @@ import com.google.cloud.storage.Bucket;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-
+/**
+ * Google cloud storage content store implementation.
+ * See also {@link org.alfresco.repo.content.ContentStore}.
+ * 
+ * @author Ana Gouveia
+ * @author Matteo Mazzola
+ * @author Sam Cheshire
+ * @author Rob Mackay
+ */
 public class GCSContentStore extends AbstractContentStore
 {
+    private static final Log LOG = LogFactory.getLog(GCSContentStore.class);
     private Bucket bucket;
     private String rootDir;
-    private static final Log logger = LogFactory.getLog(GCSContentStore.class);
 
     /**
+     * Initialises a GCS content store.
      * 
-     * @param keyFileName filename of the storage key
-     * @param bucketName The name of the bucket
-     * @param rootDir The root directory of the files in the bucket
+     * @param keyFileName Google cloud storage key file name.
+     * @param bucketName Name of GCS bucket to store content into.
+     * @param rootDir The root directory of the files in the bucket.
+     * @throws Exception If the connection to GCS was unsuccessful.
      */
-    public GCSContentStore(String keyFileName, String bucketName, String rootDir)
+    public GCSContentStore(String keyFileName, String bucketName, String rootDir) throws Exception
     {
+        if (LOG.isDebugEnabled())
+        {
+            LOG.debug("keyFileName: " + keyFileName);
+            LOG.debug("bucketName: " + bucketName);
+            LOG.debug("rootDir: " + rootDir);
+        }
         this.rootDir = rootDir;
-        //String keyPath = "alfresco/extension/" + keyFileName;
         String keyPath = keyFileName;
+        /*
+         * We first try to get the file directly. If it can't be found we search the extension folder
+         */
         InputStream is = GCSContentStore.class.getClassLoader().getResourceAsStream(keyPath);
+        if (is == null)
+        {
+            if (LOG.isDebugEnabled())
+            {
+                LOG.debug("The file couldn't be found. Trying " + "alfresco/extension/google-cloud-storage/" + keyFileName);
+            }
+            is = GCSContentStore.class.getClassLoader().getResourceAsStream("alfresco/extension/google-cloud-storage/" + keyFileName);
+        }
+        if (is == null)
+        {
+            throw new Exception("The file " + keyFileName + " was not found in the classpath.");
+        }
         JSONParser jsonParser = new JSONParser();
         JSONObject jsonObject;
         try
@@ -50,13 +81,16 @@ public class GCSContentStore extends AbstractContentStore
         }
         catch (IOException | ParseException e)
         {
-            logger.error("Error parsing the JSON in the key", e);
-            return;
+            throw e;
         }
         String projectId = (String) jsonObject.get("project_id");
         if (StringUtils.isBlank(projectId))
         {
-            logger.error("Error in getting the project_id from key file");
+            throw new Exception("Error in getting the project_id from key file");
+        }
+        if (LOG.isDebugEnabled())
+        {
+            LOG.debug("projectId: " + projectId);
         }
         GoogleCredentials credentials;
         try
@@ -67,7 +101,7 @@ public class GCSContentStore extends AbstractContentStore
         }
         catch (IOException e)
         {
-            logger.error("Error in reading credentials from the file", e);
+            throw new Exception("Error in reading credentials from the file", e);
         }
     }
 
@@ -81,6 +115,28 @@ public class GCSContentStore extends AbstractContentStore
     public ContentReader getReader(String contentUrl)
     {
         return new GCSContentReader(getPath(contentUrl), contentUrl, bucket);
+    }
+
+    @Override
+    public ContentWriter getWriterInternal(ContentReader existingContentReader, String newContentUrl) throws ContentIOException
+    {
+        try
+        {
+            String contentUrl = null;
+            if (StringUtils.isBlank(newContentUrl))
+            {
+                contentUrl = createNewUrl();
+            }
+            else
+            {
+                contentUrl = newContentUrl;
+            }
+            return new GCSContentWriter(getPath(contentUrl), contentUrl, existingContentReader, this.bucket);
+        }
+        catch (Throwable e)
+        {
+            throw new ContentIOException("GCSContentStore.getWriterInternal(): Failed to get writer.");
+        }
     }
 
     /**
