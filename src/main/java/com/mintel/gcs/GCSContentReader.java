@@ -1,4 +1,4 @@
-package main.java.com.mintel.gcs;
+package com.mintel.gcs;
 
 import java.nio.channels.ReadableByteChannel;
 

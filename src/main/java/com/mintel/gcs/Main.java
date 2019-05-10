@@ -1,6 +1,5 @@
-package main.java.com.mintel.gcs;
+package com.mintel.gcs;
 
-import java.io.FileInputStream;
 import java.io.InputStream;
 
 import com.google.auth.oauth2.GoogleCredentials;
