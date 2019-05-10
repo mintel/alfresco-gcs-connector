@@ -44,6 +44,7 @@ public class GCSContentWriter extends AbstractContentWriter
     {
         try
         {
+            // create temporary file to store data before writing to storage
             tempFile = TempFileProvider.createTempFile(uuid, ".bin");
             OutputStream os = new FileOutputStream(tempFile);
             return Channels.newChannel(os);
