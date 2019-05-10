@@ -34,17 +34,6 @@ public class GCSContentWriter extends AbstractContentWriter
     }
 
     @Override
-    public long getSize()
-    {
-        return size;
-    }
-
-    public void setSize(long size)
-    {
-        this.size = size;
-    }
-
-    @Override
     protected ContentReader createReader() throws ContentIOException
     {
         return new GCSContentReader(path, contentUrl, bucket);
@@ -55,6 +44,7 @@ public class GCSContentWriter extends AbstractContentWriter
     {
         try
         {
+            // create temporary file to store data before writing to storage
             tempFile = TempFileProvider.createTempFile(uuid, ".bin");
             OutputStream os = new FileOutputStream(tempFile);
             return Channels.newChannel(os);
@@ -78,34 +68,9 @@ public class GCSContentWriter extends AbstractContentWriter
         this.path = path;
     }
 
-    public String getContentUrl()
-    {
-        return contentUrl;
-    }
-
-    public void setContentUrl(String contentUrl)
-    {
-        this.contentUrl = contentUrl;
-    }
-
     public Bucket getBucket()
     {
         return bucket;
-    }
-
-    public void setBucket(Bucket bucket)
-    {
-        this.bucket = bucket;
-    }
-
-    public String getUuid()
-    {
-        return uuid;
-    }
-
-    public void setUuid(String uuid)
-    {
-        this.uuid = uuid;
     }
 
     public File getTempFile()
@@ -113,9 +78,15 @@ public class GCSContentWriter extends AbstractContentWriter
         return tempFile;
     }
 
-    public void setTempFile(File tempFile)
+    @Override
+    public long getSize()
     {
-        this.tempFile = tempFile;
+        return size;
+    }
+
+    public void setSize(long size)
+    {
+        this.size = size;
     }
 
 }

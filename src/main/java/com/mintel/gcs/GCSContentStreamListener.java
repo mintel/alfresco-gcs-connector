@@ -14,6 +14,7 @@ import com.google.api.client.util.ByteStreams;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.Bucket;
+import com.google.common.net.MediaType;
 
 public class GCSContentStreamListener implements ContentStreamListener
 {
@@ -36,7 +37,7 @@ public class GCSContentStreamListener implements ContentStreamListener
         writer.setSize(size);
 
         BlobId blobId = BlobId.of(bucket.getName(), writer.getPath());
-        BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType("application/octetstream").build();
+        BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType(MediaType.OCTET_STREAM.toString()).build();
         
         OutputStream writer = null;
         InputStream reader = null;
