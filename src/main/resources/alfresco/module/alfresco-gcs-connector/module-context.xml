@@ -75,7 +75,7 @@
       <constructor-arg value="cache.cachingContentStoreCache" />
    </bean>
 
-   <bean id="cachingContentStoreCleanerJobDetail" class="org.springframework.scheduling.quartz.JobDetailBean">
+   <bean id="cachingContentStoreCleanerJobDetail" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
       <property name="jobClass">
          <value>org.alfresco.repo.content.caching.cleanup.CachedContentCleanupJob</value>
       </property>
@@ -95,18 +95,20 @@
       <property name="usageTracker" ref="standardQuotaManager" />
    </bean>
 
-   <bean id="cachingContentStoreCleanerTrigger" class="org.alfresco.util.CronTriggerBean">
-      <property name="jobDetail">
-         <ref bean="cachingContentStoreCleanerJobDetail" />
-      </property>
+   <bean id="cachingContentStoreCleanerAccessor" class="org.alfresco.schedule.AlfrescoSchedulerAccessorBean">
       <property name="scheduler">
          <ref bean="schedulerFactory" />
       </property>
-      <property name="cronExpression">
-         <value>${system.content.caching.contentCleanup.cronExpression}</value>
-      </property>
-      <property name="startDelayMinutes">
-         <value>${system.cronJob.startDelayMinutes}</value>
+      <property name="triggers">
+         <list>
+            <bean id="cachingContentStoreCleanerTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+               <property name="cronExpression" value="${system.content.caching.contentCleanup.cronExpression}"/>
+               <property name="jobDetail" ref="cachingContentStoreCleanerJobDetail"/>
+               <!--      <property name="startDelayMinutes">-->
+               <!--         <value>${system.cronJob.startDelayMinutes}</value>-->
+               <!--      </property>-->
+            </bean>
+         </list>
       </property>
    </bean>
 
@@ -116,7 +118,7 @@
       </constructor-arg>
    </bean>
 
-   <bean id="replicatedContentStore" class="org.alfresco.repo.content.replication.ReplicatingContentStore">
+   <bean id="replicatedContentStore" class="org.alfresco.repo.content.replication.AggregatingContentStore">
       <property name="primaryStore">
          <ref bean="localDriveContentStore" />
       </property>
@@ -125,12 +127,6 @@
             <ref bean="cachingContentStore" />
          </list>
       </property>
-      <property name="outbound">
-         <value>true</value>
-      </property>
-      <property name="retryingTransactionHelper">
-         <ref bean="retryingTransactionHelper" />
-      </property>
    </bean>
 
 
@@ -138,14 +134,12 @@
       The main store used will use GCS first and then check the usual file location for the presence of binaries.
       There is no replication between the primary and secondary stores.
    -->
-   <bean id="gcsContentStoreStack" class="org.alfresco.repo.content.replication.ReplicatingContentStore">
+   <bean id="gcsContentStoreStack" class="org.alfresco.repo.content.replication.AggregatingContentStore">
       <property name="primaryStore" ref="cachingContentStore" />
       <property name="secondaryStores">
          <list>
             <ref bean="fileContentStore" />
          </list>
       </property>
-      <property name="inbound" value="false" />
-      <property name="outbound" value="false" />
    </bean>
 </beans>

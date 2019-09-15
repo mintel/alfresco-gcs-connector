@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
+import com.google.cloud.storage.BlobId;
 import org.alfresco.repo.content.AbstractContentStore;
 import org.alfresco.repo.content.ContentStore;
 import org.alfresco.repo.content.filestore.FileContentStore;
@@ -39,6 +40,7 @@ public class GCSContentStore extends AbstractContentStore
 {
     private static final Log LOG = LogFactory.getLog(GCSContentStore.class);
     private Bucket bucket;
+    private Storage storage;
     private String rootDir;
 
     /**
@@ -59,22 +61,8 @@ public class GCSContentStore extends AbstractContentStore
         }
         this.rootDir = rootDir;
         String keyPath = keyFileName;
-        /*
-         * We first try to get the file directly. If it can't be found we search the extension folder
-         */
-        InputStream is = GCSContentStore.class.getClassLoader().getResourceAsStream(keyPath);
-        if (is == null)
-        {
-            if (LOG.isDebugEnabled())
-            {
-                LOG.debug("The file couldn't be found. Trying " + "alfresco/extension/google-cloud-storage/" + keyFileName);
-            }
-            is = GCSContentStore.class.getClassLoader().getResourceAsStream("alfresco/extension/google-cloud-storage/" + keyFileName);
-        }
-        if (is == null)
-        {
-            throw new Exception("The file " + keyFileName + " was not found in the classpath.");
-        }
+
+        InputStream is = this.getCredentials(keyPath, keyFileName);
         JSONParser jsonParser = new JSONParser();
         JSONObject jsonObject;
         try
@@ -96,14 +84,36 @@ public class GCSContentStore extends AbstractContentStore
         }
         try
         {
-            GoogleCredentials credentials = GoogleCredentials.fromStream(GCSContentStore.class.getClassLoader().getResourceAsStream(keyPath));
-            Storage storage = StorageOptions.newBuilder().setCredentials(credentials).setProjectId(projectId).build().getService();
+            GoogleCredentials credentials = GoogleCredentials.fromStream(this.getCredentials(keyPath, keyFileName));
+            this.storage = StorageOptions.newBuilder().setCredentials(credentials).setProjectId(projectId).build().getService();
             this.bucket = storage.get(bucketName);
+            if(bucket == null)
+                throw new Exception("Couldn't get bucket with name " + bucketName);
         }
         catch (IOException e)
         {
             throw new Exception("Error in reading credentials from the file", e);
         }
+    }
+
+    private InputStream getCredentials(String keyPath, String keyFileName) throws Exception {
+        /*
+         * We first try to get the file directly. If it can't be found we search the extension folder
+         */
+        InputStream is = GCSContentStore.class.getClassLoader().getResourceAsStream(keyPath);
+        if (is == null)
+        {
+            if (LOG.isDebugEnabled())
+            {
+                LOG.debug("The file couldn't be found. Trying " + "alfresco/extension/google-cloud-storage/" + keyFileName);
+            }
+            is = GCSContentStore.class.getClassLoader().getResourceAsStream("alfresco/extension/google-cloud-storage/" + keyFileName);
+        }
+        if (is == null)
+        {
+            throw new Exception("The file " + keyFileName + " was not found in the classpath.");
+        }
+        return is;
     }
 
     @Override
@@ -115,7 +125,19 @@ public class GCSContentStore extends AbstractContentStore
     @Override
     public ContentReader getReader(String contentUrl)
     {
+        if(LOG.isDebugEnabled())
+            LOG.debug("Reading contentUrl: " + contentUrl);
         return new GCSContentReader(getPath(contentUrl), contentUrl, bucket);
+    }
+
+    @Override
+    public boolean delete(String contentUrl){
+        String path = getPath(contentUrl);
+        BlobId blobId = BlobId.of(this.bucket.getName(), path);
+        if(LOG.isDebugEnabled()){
+            LOG.debug("Deleting blobId: " + blobId);
+        }
+        return this.storage.delete(blobId);
     }
 
     @Override
@@ -123,8 +145,8 @@ public class GCSContentStore extends AbstractContentStore
     {
         try
         {
-            String contentUrl = null;
-            if (StringUtils.isBlank(newContentUrl))
+            String contentUrl;
+            if (newContentUrl == null || StringUtils.isBlank(newContentUrl))
             {
                 contentUrl = createNewUrl();
             }

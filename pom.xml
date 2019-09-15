@@ -4,6 +4,14 @@
    <artifactId>alfresco-gcs-connector</artifactId>
    <version>0.0.1-SNAPSHOT</version>
 
+   <packaging>amp</packaging>
+
+   <parent>
+      <groupId>com.mintel</groupId>
+      <artifactId>base-build</artifactId>
+      <version>4.1</version>
+   </parent>
+
    <scm>
       <url>https://github.com:amgouveia/alfresco-gcs-connector.git</url>
       <connection>scm:git@github.com:amgouveia/alfresco-gcs-connector.git</connection>
@@ -20,7 +28,7 @@
       <dependency>
          <groupId>com.google.cloud</groupId>
          <artifactId>google-cloud-storage</artifactId>
-         <version>1.73.0</version>
+         <version>1.90.0</version>
       </dependency>
 
       <dependency>
@@ -42,26 +50,5 @@
          <version>1.2.17</version>
       </dependency>
    </dependencies>
-
-   <build>
-      <sourceDirectory>src/main/java</sourceDirectory>
-      <plugins>
-         <plugin>
-            <artifactId>maven-compiler-plugin</artifactId>
-            <version>3.8.0</version>
-            <configuration>
-               <source>1.8</source>
-               <target>1.8</target>
-            </configuration>
-         </plugin>
-      </plugins>
-      <resources>
-         <resource>
-            <directory>src/main/resources</directory>
-         </resource>
-      </resources>
-   </build>
-
-
 
 </project>
