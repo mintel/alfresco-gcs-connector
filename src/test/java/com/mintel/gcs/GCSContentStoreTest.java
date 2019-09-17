@@ -1,40 +1,28 @@
 package com.mintel.gcs;
 
+import org.alfresco.service.cmr.repository.ContentReader;
+import org.alfresco.service.cmr.repository.ContentWriter;
+import org.junit.Test;
+
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.alfresco.service.cmr.repository.ContentReader;
-import org.alfresco.service.cmr.repository.ContentWriter;
-
-import com.google.auth.oauth2.GoogleCredentials;
-import com.google.cloud.storage.Bucket;
-import com.google.cloud.storage.Storage;
-import com.google.cloud.storage.StorageOptions;
-
-public class Main
-{
-
-    public static void main(String[] args) throws Exception
-    {
+public class GCSContentStoreTest {
+    @Test
+    public void test() throws Exception {
         /*
          * Init
          */
-        InputStream is = Main.class.getClassLoader().getResourceAsStream("key.json");
-        GoogleCredentials credentials = GoogleCredentials.fromStream(is);
-        Storage storage = StorageOptions.newBuilder().setCredentials(credentials).setProjectId("***REMOVED***").build().getService();
-        Bucket bucket = storage.get("***REMOVED***");
-        GCSContentStore store = new GCSContentStore("key.json", "***REMOVED***", "");
-        System.out.println(bucket);
+        GCSContentStore store = new GCSContentStore("***REMOVED***", "***REMOVED***", "");
 
         /*
          * WRITING
          */
 
-        int numberOfFiles = 10000;
+        int numberOfFiles = 100;
 
         Set<String> files = new HashSet<String>();
         for (int i = 0; i < numberOfFiles; i++)
@@ -46,8 +34,8 @@ public class Main
 
         files.parallelStream().forEach((filename) ->
         {
-            ContentReader reader = store.getReader("gs://parallel/" + filename);
-            ContentWriter writer = store.getWriterInternal(reader, "gs://parallel/" + filename);
+            ContentReader reader = store.getReader("gs://parallel3/" + filename);
+            ContentWriter writer = store.getWriterInternal(reader, "gs://parallel3/" + filename);
             WritableByteChannel channel = writer.getWritableChannel();
             try
             {
@@ -68,13 +56,26 @@ public class Main
 
         files.parallelStream().forEach((filename) ->
         {
-            ContentReader reader = store.getReader("gs://parallel/" + filename);
+            ContentReader reader = store.getReader("gs://parallel3/" + filename);
             /*System.out.println("Exists: " + reader.exists());
             System.out.println("Last modified: " + reader.getLastModified());
             System.out.println("Size: " + reader.getSize());*/
             System.out.println("Content: " + reader.getContentString());
         });
+        timeElapsed = System.currentTimeMillis() - startTime;
+        System.out.println("Execution time in milliseconds  : " + timeElapsed);
+        System.out.println("\tTime elapsed per file: " + (timeElapsed / files.size()) + "ms");
 
+
+
+        System.out.println("Starting delete");
+
+        startTime = System.currentTimeMillis();
+        files.parallelStream().forEach((filename) ->
+        {
+            store.delete("gs://parallel3/" + filename);
+            ContentReader reader = store.getReader("gs://parallel3/" + filename);
+        });
         timeElapsed = System.currentTimeMillis() - startTime;
         System.out.println("Execution time in milliseconds  : " + timeElapsed);
         System.out.println("\tTime elapsed per file: " + (timeElapsed / files.size()) + "ms");
@@ -82,19 +83,18 @@ public class Main
         /* ContentReader reader = store.getReader("gs://hi/sam.txt");
         ContentWriter writer = store.getWriterInternal(reader, "gs://hi/sam.txt");
         WritableByteChannel channel = writer.getWritableChannel();
-        
+
         String emoji = "☊☋☌☍☎☏☐☑☒☓☔☕☖☗☘☙☚☛☜☝☞☟☠☡☢☣☤☥☦☧☨☩☪☫☬☭☮☯☰☱☲☳☴☵☶☷☸☹☺☻☼☽☾☿♀♁♂♃♄♅♆♇♈♉♊♋♌♍♎♏♐♑♒♓♔♕♖♗♘♙♚♛♜♝♞♟♠♡♢♣♤♥♦♧♨♩♪♫♬♭♮♯≰≱≲≳≴≵≶≷≸≹≺≻≼≽≾≿⊀⊁⊂⊃⊄⊅⊆⊇⊈⊉⊊⊋⊌⊍⊎⊏⊐⊑⊒⊓⊔⊕⊖⊗⊘⊙⊚⊛⊜⊝⊞⊟⊠⊡⊢⊣⊤⊥⊦⊧⊨⊩⊪⊫⊬⊭⊮⊯⊰⊱⊲⊳⊴⊵⊶⊷⊸⊹";
-        
+
         channel.write(ByteBuffer.wrap(emoji.getBytes()));
         channel.close();
-        
-        
+
+
          * READING
-         
+
         System.out.println("Exists: " + reader.exists());
         System.out.println("Last modified: " + reader.getLastModified());
         System.out.println("Size: " + reader.getSize());
         System.out.println("Content: " + reader.getContentString());*/
     }
-
 }
