@@ -13,7 +13,10 @@ services:
       dockerfile: ./Dockerfile
       context: ../../../target
     environment:
-      CATALINA_OPTS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:8888 -Dgcs.bucketName=***REMOVED*** -Dgcs.keyFileName=***REMOVED***"
+      CATALINA_OPTS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:8888
+        -Dgcs.bucketName=***REMOVED***
+        -Dgcs.bucketName.deleted=***REMOVED***
+        -Dgcs.keyFileName=***REMOVED***"
     ports:
       - "${acs.port}:8080"
       - "${acs.debug.port}:8888"
