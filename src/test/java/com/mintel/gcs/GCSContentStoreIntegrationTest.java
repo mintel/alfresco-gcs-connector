@@ -7,8 +7,6 @@ import org.alfresco.repo.content.MimetypeMap;
 import org.alfresco.repo.nodelocator.CompanyHomeNodeLocator;
 import org.alfresco.service.cmr.model.FileInfo;
 import org.alfresco.service.cmr.repository.*;
-import org.alfresco.service.namespace.NamespaceService;
-import org.alfresco.service.namespace.QName;
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,9 +14,8 @@ import org.junit.runner.RunWith;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Serializable;
-import java.util.Map;
 
+import static junit.framework.TestCase.assertNotNull;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -39,18 +36,35 @@ public class GCSContentStoreIntegrationTest extends AbstractAlfrescoIT {
         NodeRef parentRef = this.getCompanyHomeNodeRef();
         FileInfo node = this.getServiceRegistry().getFileFolderService().create(
                 parentRef,
-                "readWriteTest.txt"+System.currentTimeMillis(),
+                "readWriteTest" + System.currentTimeMillis() + ".txt",
                 ContentModel.TYPE_CONTENT
         );
         NodeRef nodeRef = node.getNodeRef();
+        assertNotNull(nodeRef);
         String textContent = "node content";
         addFileContent(node.getNodeRef(), textContent);
 
         assertEquals(textContent,readTextContent(node.getNodeRef()));
 
-        if (nodeRef != null) {
-            getServiceRegistry().getNodeService().deleteNode(nodeRef);
-        }
+        getServiceRegistry().getNodeService().deleteNode(nodeRef);
+    }
+
+    @Test
+    public void emojiTest(){
+        String emoji = "☊☋☌☍☎☏☐☑☒☓☔☕☖☗☘☙☚☛☜☝☞☟☠☡☢☣☤☥☦☧☨☩☪☫☬☭☮☯☰☱☲☳☴☵☶☷☸☹☺☻☼☽☾☿♀♁♂♃♄♅♆♇♈♉♊♋♌♍♎♏♐♑♒♓♔♕♖♗♘♙♚♛♜♝♞♟♠♡♢♣♤♥♦♧♨♩♪♫♬♭♮♯≰≱≲≳≴≵≶≷≸≹≺≻≼≽≾≿⊀⊁⊂⊃⊄⊅⊆⊇⊈⊉⊊⊋⊌⊍⊎⊏⊐⊑⊒⊓⊔⊕⊖⊗⊘⊙⊚⊛⊜⊝⊞⊟⊠⊡⊢⊣⊤⊥⊦⊧⊨⊩⊪⊫⊬⊭⊮⊯⊰⊱⊲⊳⊴⊵⊶⊷⊸⊹";
+        NodeRef parentRef = this.getCompanyHomeNodeRef();
+        FileInfo node = this.getServiceRegistry().getFileFolderService().create(
+            parentRef,
+            "emojiTest" + System.currentTimeMillis() + ".txt",
+            ContentModel.TYPE_CONTENT
+        );
+        NodeRef nodeRef = node.getNodeRef();
+        assertNotNull(nodeRef);
+        addFileContent(node.getNodeRef(), emoji);
+
+        assertEquals(emoji,readTextContent(node.getNodeRef()));
+
+        getServiceRegistry().getNodeService().deleteNode(nodeRef);
     }
 
     @Test
@@ -75,11 +89,10 @@ public class GCSContentStoreIntegrationTest extends AbstractAlfrescoIT {
         NodeRef parentRef = this.getCompanyHomeNodeRef();
         FileInfo node = this.getServiceRegistry().getFileFolderService().create(
                 parentRef,
-                "readWriteTest.txt"+System.currentTimeMillis(),
+                "node content test " + System.currentTimeMillis() + ".txt",
                 ContentModel.TYPE_CONTENT
         );
-        String textContent = "node content";
-        addFileContent(node.getNodeRef(), textContent);
+        addFileContent(node.getNodeRef(), content);
         return node.getNodeRef();
     }
 
@@ -98,25 +111,6 @@ public class GCSContentStoreIntegrationTest extends AbstractAlfrescoIT {
         writer.putContent(fileContent);
     }
 
-    /**
-     * Create a new node, such as a file or a folder, with passed in type and properties
-     *
-     * @param name the name of the file or folder
-     * @param type the content model type
-     * @param properties the properties from the content model
-     * @return the Node Reference for the newly created node
-     */
-    private NodeRef createNode(String name, QName type, Map<QName, Serializable> properties) {
-        NodeRef parentFolderNodeRef = getCompanyHomeNodeRef();
-        QName associationType = ContentModel.ASSOC_CONTAINS;
-        QName associationQName = QName.createQName(NamespaceService.CONTENT_MODEL_1_0_URI,
-                QName.createValidLocalName(name));
-        properties.put(ContentModel.PROP_NAME, name);
-        ChildAssociationRef parentChildAssocRef = getServiceRegistry().getNodeService().createNode(
-                parentFolderNodeRef, associationType, associationQName, type, properties);
-
-        return parentChildAssocRef.getChildRef();
-    }
 
     /**
      * Get the node reference for the /Company Home top folder in Alfresco.
