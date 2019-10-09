@@ -10,9 +10,13 @@ import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.Bucket;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.Storage.BlobGetOption;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public class GCSContentReader extends AbstractContentReader
 {
+    private static final Log LOG = LogFactory.getLog(GCSContentStore.class);
+
     private static BlobGetOption METADATA_FIELDS = BlobGetOption.fields(
         Storage.BlobField.UPDATED,
         Storage.BlobField.SIZE
@@ -68,6 +72,8 @@ public class GCSContentReader extends AbstractContentReader
         }
         try
         {
+            if(LOG.isDebugEnabled())
+                LOG.debug("Reading object using path: " + path);
             return bucket.get(path).reader();
         }
         catch (Exception e)

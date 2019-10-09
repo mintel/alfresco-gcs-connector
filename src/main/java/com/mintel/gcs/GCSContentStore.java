@@ -125,9 +125,10 @@ public class GCSContentStore extends AbstractContentStore
     @Override
     public ContentReader getReader(String contentUrl)
     {
+        String path = getPath(contentUrl);
         if(LOG.isDebugEnabled())
-            LOG.debug("Reading contentUrl: " + contentUrl);
-        return new GCSContentReader(getPath(contentUrl), contentUrl, bucket);
+            LOG.debug("Creating reader with path: "+path + "; contentUrl: " + contentUrl);
+        return new GCSContentReader(path, contentUrl, bucket);
     }
 
     @Override
