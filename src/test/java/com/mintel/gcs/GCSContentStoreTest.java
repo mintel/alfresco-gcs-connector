@@ -9,6 +9,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import static junit.framework.TestCase.assertNotNull;
@@ -21,7 +22,14 @@ public class GCSContentStoreTest
     public static final String BUCKET_NAME = "***REMOVED***";
     public static final String KEY = "***REMOVED***";
 
-    @Test public void test() throws Exception
+    /**
+     * General test that doesn't require a running Alfresco.
+     * Uses the GCSContentstore directly.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void test() throws Exception
     {
         /**
          * Init
@@ -42,6 +50,7 @@ public class GCSContentStoreTest
          */
         System.out.println("Starting write....");
         long startTime = System.currentTimeMillis();
+        AtomicInteger numberOfFilesWritten = new AtomicInteger();
         files.parallelStream().forEach((filename) -> {
             ContentReader reader = store.getReader(BUCKET_PATH + filename);
             ContentWriter writer = store.getWriterInternal(reader, BUCKET_PATH + filename);
@@ -50,6 +59,8 @@ public class GCSContentStoreTest
             {
                 channel.write(ByteBuffer.wrap(filename.getBytes()));
                 channel.close();
+                numberOfFilesWritten.addAndGet(1);
+
             }
             catch (IOException e)
             {
@@ -59,6 +70,7 @@ public class GCSContentStoreTest
         long timeElapsed = System.currentTimeMillis() - startTime;
         System.out.println("Written " + numberOfFiles + " documents in " + timeElapsed + " milliseconds : ");
         System.out.println("\tTime elapsed per file: " + (timeElapsed / files.size()) + "ms\n");
+        assertEquals(numberOfFiles, numberOfFilesWritten.get());
 
 
         /**
@@ -66,6 +78,7 @@ public class GCSContentStoreTest
          */
         System.out.println("Starting read....");
         startTime = System.currentTimeMillis();
+        AtomicInteger numberOfFilesDeleted = new AtomicInteger();
         Stream<String> results = files.parallelStream().map((filename) -> {
             ContentReader reader = store.getReader(BUCKET_PATH + filename);
             assertTrue(reader.exists());
@@ -73,16 +86,18 @@ public class GCSContentStoreTest
             System.out.println("Content: " + content);
             assertNotNull(content);
             assertEquals(filename, content);
+            numberOfFilesDeleted.addAndGet(1);
             return content;
         });
         assertEquals(numberOfFiles, results.count());
         timeElapsed = System.currentTimeMillis() - startTime;
         System.out.println("Read " + numberOfFiles + " documents in " + timeElapsed + " milliseconds : ");
         System.out.println("\tTime elapsed per file: " + (timeElapsed / files.size()) + "ms\n");
+        assertEquals(numberOfFiles, numberOfFilesDeleted.get());
 
 
         /**
-         * Write
+         * Delete
          */
         System.out.println("Starting delete");
         startTime = System.currentTimeMillis();
@@ -95,6 +110,11 @@ public class GCSContentStoreTest
         System.out.println("\tTime elapsed per file: " + (timeElapsed / files.size()) + "ms\n");
     }
 
+    /**
+     * Checks if we can handle different legacy contenturls.
+     *
+     * @throws Exception
+     */
     @Test
     public void contentUrlTest() throws Exception{
         GCSContentStore store = new GCSContentStore(KEY, BUCKET_NAME, "contentstore");

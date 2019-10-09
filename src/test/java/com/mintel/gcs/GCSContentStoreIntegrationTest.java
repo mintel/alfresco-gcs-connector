@@ -26,14 +26,18 @@ import static org.junit.Assert.assertFalse;
 public class GCSContentStoreIntegrationTest extends AbstractAlfrescoIT {
 
     private GCSContentStore store;
-    private EagerContentStoreCleaner eagerContentStoreCleaner;
 
+    /**
+     *  Initialises the contentstore
+     */
     @Before
     public void setupContentStore(){
         this.store = (GCSContentStore) getApplicationContext().getBean("gcsContentStore");
-        eagerContentStoreCleaner = (EagerContentStoreCleaner) getApplicationContext().getBean("eagerContentStoreCleaner");
     }
 
+    /**
+     * A simple read and write test.
+     */
     @Test
     public void readWriteTest(){
         NodeRef parentRef = this.getCompanyHomeNodeRef();
@@ -52,6 +56,9 @@ public class GCSContentStoreIntegrationTest extends AbstractAlfrescoIT {
         getServiceRegistry().getNodeService().deleteNode(nodeRef);
     }
 
+    /**
+     * Tests if we can write some weird characters.
+     */
     @Test
     public void emojiTest(){
         String emoji = "☊☋☌☍☎☏☐☑☒☓☔☕☖☗☘☙☚☛☜☝☞☟☠☡☢☣☤☥☦☧☨☩☪☫☬☭☮☯☰☱☲☳☴☵☶☷☸☹☺☻☼☽☾☿♀♁♂♃♄♅♆♇♈♉♊♋♌♍♎♏♐♑♒♓♔♕♖♗♘♙♚♛♜♝♞♟♠♡♢♣♤♥♦♧♨♩♪♫♬♭♮♯≰≱≲≳≴≵≶≷≸≹≺≻≼≽≾≿⊀⊁⊂⊃⊄⊅⊆⊇⊈⊉⊊⊋⊌⊍⊎⊏⊐⊑⊒⊓⊔⊕⊖⊗⊘⊙⊚⊛⊜⊝⊞⊟⊠⊡⊢⊣⊤⊥⊦⊧⊨⊩⊪⊫⊬⊭⊮⊯⊰⊱⊲⊳⊴⊵⊶⊷⊸⊹";
@@ -70,6 +77,9 @@ public class GCSContentStoreIntegrationTest extends AbstractAlfrescoIT {
         getServiceRegistry().getNodeService().deleteNode(nodeRef);
     }
 
+    /**
+     * Tests if we can delete a node's content
+     */
     @Test
     public void deleteNodeTest() {
         NodeRef nodeRef = this.createTestNode("testDeleteNode");
@@ -83,13 +93,20 @@ public class GCSContentStoreIntegrationTest extends AbstractAlfrescoIT {
         assertFalse(store.getReader(contentUrl).exists());
     }
 
+    /**
+     * Tests if handles made-up contenturls as we could have forgotten objects during migration
+     */
     @Test
     public void existsTest() {
         assertFalse("Made up contenturl shouldn't exist", store.getReader("store://2099/9/17/3/58/182ad6bb-ec25-4012-8bcf-f370b2452d3e.bin").exists());
     }
 
+    /**
+     * Tests if the integration with the eagerContentStoreCleaner is working correctly.
+     */
     @Test
     public void eagerContentStoreCleanerTest(){
+        EagerContentStoreCleaner eagerContentStoreCleaner = (EagerContentStoreCleaner) getApplicationContext().getBean("eagerContentStoreCleaner");
         NodeRef nodeRef = this.createTestNode("eagerContentStoreCleanerTest");
         ContentData contentData = (ContentData) this.getServiceRegistry().getNodeService().getProperty(nodeRef, ContentModel.PROP_CONTENT);
         String contentUrl = contentData.getContentUrl();
@@ -97,6 +114,14 @@ public class GCSContentStoreIntegrationTest extends AbstractAlfrescoIT {
         assertTrue(deleted);
     }
 
+    /**
+     * Creates a node with some content.
+     *  Will be of type cm:content and located directly under Company Home.
+     *  Additionally it will have a timestamp to avoid conflicts.
+     *
+     * @param content Text to write as content of the node
+     * @return NodeRef of created node
+     */
     private NodeRef createTestNode(String content){
         NodeRef parentRef = this.getCompanyHomeNodeRef();
         FileInfo node = this.getServiceRegistry().getFileFolderService().create(

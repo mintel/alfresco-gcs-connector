@@ -96,6 +96,16 @@ public class GCSContentStore extends AbstractContentStore
         }
     }
 
+    /**
+     * Searches for the credentials file and reads it.
+     *  First based on the file directly on the classpath, most likely shipped within a java jar
+     *  If not found, searches in the extension folder
+     *
+     * @param keyPath path where to search for the key
+     * @param keyFileName filename of the key
+     * @return json key file as inputstream
+     * @throws Exception
+     */
     private InputStream getCredentials(String keyPath, String keyFileName) throws Exception {
         /*
          * We first try to get the file directly. If it can't be found we search the extension folder
