@@ -23,19 +23,19 @@
          <value>${gcs.bucketName}</value>
       </constructor-arg>
       <constructor-arg>
-         <value>${dir.contentstore}</value>
+         <value>${gcs.dir.contentstore}</value>
       </constructor-arg>
    </bean>
 
    <bean id="deletedContentStore" class="com.mintel.gcs.GCSContentStore">
       <constructor-arg>
-         <value>${gcs.keyFileName}</value>
+         <value>${gcs.keyFileName.deleted}</value>
       </constructor-arg>
       <constructor-arg>
          <value>${gcs.bucketName.deleted}</value>
       </constructor-arg>
       <constructor-arg>
-         <value>${dir.contentstore.deleted}</value>
+         <value>${gcs.dir.contentstore.deleted}</value>
       </constructor-arg>
    </bean>
 

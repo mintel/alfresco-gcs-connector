@@ -95,4 +95,15 @@ public class GCSContentStoreTest
         System.out.println("\tTime elapsed per file: " + (timeElapsed / files.size()) + "ms\n");
     }
 
+    @Test
+    public void contentUrlTest() throws Exception{
+        GCSContentStore store = new GCSContentStore(KEY, BUCKET_NAME, "contentstore");
+
+        assertEquals("contentstore/2013/12/17/16/57/5f3ee607-0d69-409b-9bdd-320c04a72706.bin",
+            store.getPath("store://2013/12/17/16/57/5f3ee607-0d69-409b-9bdd-320c04a72706.bin"));
+
+        assertEquals("contentstore/-system-/2018/10/5/1/21/ff9fefb3-6665-4c04-9b21-7641a9d1258e.bin",
+            store.getPath("s3://-system-/2018/10/5/1/21/ff9fefb3-6665-4c04-9b21-7641a9d1258e.bin"));
+    }
+
 }

@@ -4,6 +4,7 @@ import org.alfresco.model.ContentModel;
 import org.alfresco.rad.test.AbstractAlfrescoIT;
 import org.alfresco.rad.test.AlfrescoTestRunner;
 import org.alfresco.repo.content.MimetypeMap;
+import org.alfresco.repo.content.cleanup.EagerContentStoreCleaner;
 import org.alfresco.repo.nodelocator.CompanyHomeNodeLocator;
 import org.alfresco.service.cmr.model.FileInfo;
 import org.alfresco.service.cmr.repository.*;
@@ -25,10 +26,12 @@ import static org.junit.Assert.assertFalse;
 public class GCSContentStoreIntegrationTest extends AbstractAlfrescoIT {
 
     private GCSContentStore store;
+    private EagerContentStoreCleaner eagerContentStoreCleaner;
 
     @Before
     public void setupContentStore(){
         this.store = (GCSContentStore) getApplicationContext().getBean("gcsContentStore");
+        eagerContentStoreCleaner = (EagerContentStoreCleaner) getApplicationContext().getBean("eagerContentStoreCleaner");
     }
 
     @Test
@@ -83,6 +86,15 @@ public class GCSContentStoreIntegrationTest extends AbstractAlfrescoIT {
     @Test
     public void existsTest() {
         assertFalse("Made up contenturl shouldn't exist", store.getReader("store://2099/9/17/3/58/182ad6bb-ec25-4012-8bcf-f370b2452d3e.bin").exists());
+    }
+
+    @Test
+    public void eagerContentStoreCleanerTest(){
+        NodeRef nodeRef = this.createTestNode("eagerContentStoreCleanerTest");
+        ContentData contentData = (ContentData) this.getServiceRegistry().getNodeService().getProperty(nodeRef, ContentModel.PROP_CONTENT);
+        String contentUrl = contentData.getContentUrl();
+        boolean deleted = eagerContentStoreCleaner.deleteFromStores(contentUrl);
+        assertTrue(deleted);
     }
 
     private NodeRef createTestNode(String content){
