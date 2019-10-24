@@ -17,6 +17,9 @@
 
    <bean id="gcsContentStore" class="com.mintel.gcs.GCSContentStore">
       <constructor-arg>
+         <value>${gcs.keyPath}</value>
+      </constructor-arg>
+      <constructor-arg>
          <value>${gcs.keyFileName}</value>
       </constructor-arg>
       <constructor-arg>
@@ -28,6 +31,9 @@
    </bean>
 
    <bean id="deletedContentStore" class="com.mintel.gcs.GCSContentStore">
+      <constructor-arg>
+         <value>${gcs.keyPath.deleted}</value>
+      </constructor-arg>
       <constructor-arg>
          <value>${gcs.keyFileName.deleted}</value>
       </constructor-arg>
