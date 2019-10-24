@@ -35,7 +35,7 @@ public class GCSContentReader extends AbstractContentReader
      */
     private String contentUrl;
     /**
-     * The bucket where the content should be in
+     * The bucket where the content should be
      */
     private Bucket bucket;
     /**
@@ -117,7 +117,7 @@ public class GCSContentReader extends AbstractContentReader
         }
         catch (Exception e)
         {
-            throw new ContentIOException("could not read", e);
+            throw new ContentIOException("Could not read", e);
         }
     }
 

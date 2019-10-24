@@ -27,7 +27,7 @@ import com.google.common.net.MediaType;
 public class GCSContentStreamListener implements ContentStreamListener
 {
     /**
-     * The bucket where the content should be in
+     * The bucket where the content should be
      */
     private Bucket bucket;
     /**

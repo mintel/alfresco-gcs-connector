@@ -33,7 +33,7 @@ public class GCSContentWriter extends AbstractContentWriter
      */
     private String contentUrl;
     /**
-     * The bucket where the content should be in
+     * The bucket where the content should be
      */
     private Bucket bucket;
     /**
@@ -91,7 +91,7 @@ public class GCSContentWriter extends AbstractContentWriter
         }
         catch (Throwable e)
         {
-            throw new ContentIOException("could not open write channel, sorry", e);
+            throw new ContentIOException("Could not open write channel, sorry", e);
         }
     }
 

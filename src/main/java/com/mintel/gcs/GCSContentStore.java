@@ -40,7 +40,7 @@ public class GCSContentStore extends AbstractContentStore
 {
     private static final Log LOG = LogFactory.getLog(GCSContentStore.class);
     /**
-     * The bucket where the content should be in
+     * The bucket where the content should be
      */
     private Bucket bucket;
     /**
@@ -99,7 +99,9 @@ public class GCSContentStore extends AbstractContentStore
             this.storage = StorageOptions.newBuilder().setCredentials(credentials).setProjectId(projectId).build().getService();
             this.bucket = storage.get(bucketName);
             if (bucket == null)
+            {
                 throw new Exception("Couldn't get bucket with name " + bucketName);
+            }
         }
         catch (IOException e)
         {
