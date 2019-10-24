@@ -14,15 +14,49 @@ import org.alfresco.util.TempFileProvider;
 
 import com.google.cloud.storage.Bucket;
 
+/**
+ * Google cloud storage contend writer implementation.
+ * 
+ * @author Ana Gouveia
+ * @author Matteo Mazzola
+ * @author Sam Cheshire
+ * @author Rob Mackay
+ */
 public class GCSContentWriter extends AbstractContentWriter
 {
+    /**
+     * The path of the content within the store/bucket. By using this if data is migrated to a new bucket it will still work without changing the database values.
+     */
     private String path;
+    /**
+     * The full content URL of the node
+     */
     private String contentUrl;
+    /**
+     * The bucket where the content should be in
+     */
     private Bucket bucket;
+    /**
+     * Temporary uuid for caching the content before writing it to storage 
+     */
     private String uuid;
+    /**
+     * The content size
+     */
     private long size;
+    /**
+     * The temporary file written locally before writing it to storage 
+     */
     private File tempFile;
 
+    /**
+     * Initialises a GCS content writer
+     * 
+     * @param path The simple path to the content inside the contentstore
+     * @param contentUrl The full content URL
+     * @param existingContentReader A reader of a previous version of this content
+     * @param bucket The bucket where the content should be
+     */
     protected GCSContentWriter(String path, String contentUrl, ContentReader existingContentReader, Bucket bucket)
     {
         super(contentUrl, existingContentReader);
@@ -33,12 +67,18 @@ public class GCSContentWriter extends AbstractContentWriter
         addListener(new GCSContentStreamListener(this));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected ContentReader createReader() throws ContentIOException
     {
         return new GCSContentReader(path, contentUrl, bucket);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected WritableByteChannel getDirectWritableChannel() throws ContentIOException
     {
@@ -58,6 +98,7 @@ public class GCSContentWriter extends AbstractContentWriter
     /*
      * Getters and setters
      */
+
     public String getPath()
     {
         return path;
@@ -88,5 +129,4 @@ public class GCSContentWriter extends AbstractContentWriter
     {
         this.size = size;
     }
-
 }
