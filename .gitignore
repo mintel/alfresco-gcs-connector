@@ -4,3 +4,4 @@ bin
 key.json
 .idea
 .classpath
+rebel.xml

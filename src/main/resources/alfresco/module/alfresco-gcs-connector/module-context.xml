@@ -17,25 +17,31 @@
 
    <bean id="gcsContentStore" class="com.mintel.gcs.GCSContentStore">
       <constructor-arg>
+         <value>${gcs.keyPath}</value>
+      </constructor-arg>
+      <constructor-arg>
          <value>${gcs.keyFileName}</value>
       </constructor-arg>
       <constructor-arg>
          <value>${gcs.bucketName}</value>
       </constructor-arg>
       <constructor-arg>
-         <value>${dir.contentstore}</value>
+         <value>${gcs.dir.contentstore}</value>
       </constructor-arg>
    </bean>
 
    <bean id="deletedContentStore" class="com.mintel.gcs.GCSContentStore">
       <constructor-arg>
-         <value>${gcs.keyFileName}</value>
+         <value>${gcs.keyPath.deleted}</value>
       </constructor-arg>
       <constructor-arg>
-         <value>${gcs.bucketName}</value>
+         <value>${gcs.keyFileName.deleted}</value>
       </constructor-arg>
       <constructor-arg>
-         <value>${dir.contentstore.deleted}</value>
+         <value>${gcs.bucketName.deleted}</value>
+      </constructor-arg>
+      <constructor-arg>
+         <value>${gcs.dir.contentstore.deleted}</value>
       </constructor-arg>
    </bean>
 
@@ -104,9 +110,6 @@
             <bean id="cachingContentStoreCleanerTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
                <property name="cronExpression" value="${system.content.caching.contentCleanup.cronExpression}"/>
                <property name="jobDetail" ref="cachingContentStoreCleanerJobDetail"/>
-               <!--      <property name="startDelayMinutes">-->
-               <!--         <value>${system.cronJob.startDelayMinutes}</value>-->
-               <!--      </property>-->
             </bean>
          </list>
       </property>
