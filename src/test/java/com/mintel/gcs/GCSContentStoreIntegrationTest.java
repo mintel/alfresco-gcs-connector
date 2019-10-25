@@ -70,6 +70,18 @@ public class GCSContentStoreIntegrationTest extends AbstractAlfrescoIT
         assertFalse(store.getReader(contentUrl).exists());
     }
 
+    /**
+     * Tests if the delete handles deleting deleted content without throwing errors.
+     */
+    @Test
+    public void deleteContentUrlTest(){
+        boolean deleted = store.delete("store://2012/nolongerexists/182ad6bb-ec25-4012-8bcf-f370b2452d3e.bin");
+        assertTrue("If the content no longer exists, then true is returned",deleted);
+    }
+
+    /**
+     * Tests if handles made-up contenturls as we could have forgotten objects during migration
+     */
     @Test
     public void existsTest()
     {

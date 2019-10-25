@@ -145,7 +145,10 @@ public class GCSContentStore extends AbstractContentStore
         {
             LOG.debug("Deleting blobId: " + blobId);
         }
-        return this.storage.delete(blobId);
+        this.storage.delete(blobId);
+
+        //If the content no longer exists, then true is returned
+        return true;
     }
 
     /**
