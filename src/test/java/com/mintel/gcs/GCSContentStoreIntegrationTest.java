@@ -74,9 +74,10 @@ public class GCSContentStoreIntegrationTest extends AbstractAlfrescoIT
      * Tests if the delete handles deleting deleted content without throwing errors.
      */
     @Test
-    public void deleteContentUrlTest(){
+    public void deleteContentUrlTest()
+    {
         boolean deleted = store.delete("store://2012/nolongerexists/182ad6bb-ec25-4012-8bcf-f370b2452d3e.bin");
-        assertTrue("If the content no longer exists, then true is returned",deleted);
+        assertTrue("If the content no longer exists, then true is returned", deleted);
     }
 
     /**
@@ -98,15 +99,12 @@ public class GCSContentStoreIntegrationTest extends AbstractAlfrescoIT
      *  It shouldn't throw an error, and obviously it should write the content
      */
     @Test
-    public void putContentTest() {
+    public void putContentTest()
+    {
         NodeRef parentRef = this.getCompanyHomeNodeRef();
-        String fileName = "putContentTest"+System.currentTimeMillis()+".txt";
+        String fileName = "putContentTest" + System.currentTimeMillis() + ".txt";
         String content = "putContentTest content";
-        FileInfo file = this.getServiceRegistry().getFileFolderService().create(
-            parentRef,
-            fileName,
-            ContentModel.TYPE_CONTENT,
-            ContentModel.ASSOC_CONTAINS);
+        FileInfo file = this.getServiceRegistry().getFileFolderService().create(parentRef, fileName, ContentModel.TYPE_CONTENT, ContentModel.ASSOC_CONTAINS);
         NodeRef nodeRef = file.getNodeRef();
         ContentWriter writer = this.getServiceRegistry().getContentService().getWriter(nodeRef, ContentModel.PROP_CONTENT, true);
         writer.guessMimetype(fileName);

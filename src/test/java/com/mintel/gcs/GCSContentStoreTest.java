@@ -35,8 +35,8 @@ public class GCSContentStoreTest
     @Before
     public void setup()
     {
-        this.BUCKET_NAME=System.getenv("BUCKET_NAME");
-        if(this.BUCKET_NAME == null)
+        BUCKET_NAME = System.getenv("BUCKET_NAME");
+        if (BUCKET_NAME == null)
         {
             throw new NullPointerException("Bucketname can not be null.");
         }

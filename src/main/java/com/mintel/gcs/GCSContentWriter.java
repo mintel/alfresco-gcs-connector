@@ -74,7 +74,7 @@ public class GCSContentWriter extends AbstractContentWriter
     @Override
     protected ContentReader createReader() throws ContentIOException
     {
-        if(this.getTempFile() != null)
+        if (this.getTempFile() != null)
         {
             FileContentReader reader = new FileContentReader(this.getTempFile(), this.getContentUrl());
             reader.setMimetype(this.getMimetype());
