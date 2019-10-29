@@ -15,6 +15,7 @@ services:
     environment:
       CATALINA_OPTS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:8888
         -Dgcs.bucketName=${BUCKET_NAME}
+        -Dgcs.bucketName.deleted=${BUCKET_NAME_DELETED}
         -Dgcs.keyFileName=key.json"
     ports:
       - "${acs.port}:8080"
