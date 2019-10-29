@@ -93,7 +93,7 @@ public class GCSContentStoreIntegrationTest extends AbstractAlfrescoIT
      * Tests putContent method.
      *
      * We test this because we had 2 known issues:
-     *  ADMRemoteStore uses it. Without contentcache on, creating sites don't work anymore
+     *  ADMRemoteStore uses it. Without contentcache on, creating sites doesn't work anymore
      *  Custom code at client that uses the exact same methods
      *
      *  It shouldn't throw an error, and obviously it should write the content
