@@ -70,10 +70,48 @@ public class GCSContentStoreIntegrationTest extends AbstractAlfrescoIT
         assertFalse(store.getReader(contentUrl).exists());
     }
 
+    /**
+     * Tests if the delete handles deleting deleted content without throwing errors.
+     */
+    @Test
+    public void deleteContentUrlTest()
+    {
+        boolean deleted = store.delete("store://2012/nolongerexists/182ad6bb-ec25-4012-8bcf-f370b2452d3e.bin");
+        assertTrue("If the content no longer exists, then true is returned", deleted);
+    }
+
+    /**
+     * Tests if handles made-up contenturls as we could have forgotten objects during migration
+     */
     @Test
     public void existsTest()
     {
         assertFalse("Made up contenturl shouldn't exist", store.getReader("store://2099/9/17/3/58/182ad6bb-ec25-4012-8bcf-f370b2452d3e.bin").exists());
+    }
+
+    /***
+     * Tests putContent method.
+     *
+     * We test this because we had 2 known issues:
+     *  ADMRemoteStore uses it. Without contentcache on, creating sites doesn't work anymore
+     *  Custom code at client that uses the exact same methods
+     *
+     *  It shouldn't throw an error, and obviously it should write the content
+     */
+    @Test
+    public void putContentTest()
+    {
+        NodeRef parentRef = this.getCompanyHomeNodeRef();
+        String fileName = "putContentTest" + System.currentTimeMillis() + ".txt";
+        String content = "putContentTest content";
+        FileInfo file = this.getServiceRegistry().getFileFolderService().create(parentRef, fileName, ContentModel.TYPE_CONTENT, ContentModel.ASSOC_CONTAINS);
+        NodeRef nodeRef = file.getNodeRef();
+        ContentWriter writer = this.getServiceRegistry().getContentService().getWriter(nodeRef, ContentModel.PROP_CONTENT, true);
+        writer.guessMimetype(fileName);
+        writer.putContent(content);
+
+        assertEquals(content, readTextContent(nodeRef));
+        assertEquals(MimetypeMap.MIMETYPE_TEXT_PLAIN, getServiceRegistry().getContentService().getReader(nodeRef, ContentModel.PROP_CONTENT).getMimetype());
     }
 
     private NodeRef createTestNode(String content)

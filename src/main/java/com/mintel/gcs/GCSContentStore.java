@@ -145,7 +145,11 @@ public class GCSContentStore extends AbstractContentStore
         {
             LOG.debug("Deleting blobId: " + blobId);
         }
-        return this.storage.delete(blobId);
+        this.storage.delete(blobId);
+
+        //Alfresco interface requires us to return true if the content is not found OR deleted,
+        // so we cannot use the Storage's one because it would be false in the first case.
+        return true;
     }
 
     /**

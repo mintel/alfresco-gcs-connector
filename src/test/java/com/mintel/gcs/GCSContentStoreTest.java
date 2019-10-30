@@ -14,6 +14,7 @@ import java.util.stream.Stream;
 
 import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.ContentWriter;
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -27,9 +28,19 @@ import org.junit.Test;
 public class GCSContentStoreTest
 {
     public static final String BUCKET_PATH = "gs://parallel/";
-    public static final String BUCKET_NAME = "***REMOVED***";
+    public static String BUCKET_NAME;
     public static final String KEY = "key.json";
     public static final String KEY_PATH = "alfresco/extension/google-cloud-storage/";
+
+    @Before
+    public void setup()
+    {
+        BUCKET_NAME = System.getenv("BUCKET_NAME");
+        if (BUCKET_NAME == null)
+        {
+            throw new NullPointerException("Bucketname can not be null.");
+        }
+    }
 
     /**
      * General test that doesn't require a running Alfresco.

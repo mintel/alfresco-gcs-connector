@@ -16,6 +16,21 @@ mvn clean package -DskipTests=true
 
 This will generate the jar file.
 
+## Testing ##
+
+You need to create your own GCS environment by creating a bucket and credentials file.
+
+Use your bucket by setting the environment variable:
+```
+export BUCKET_NAME=myBucketName
+export BUCKET_NAME_DELETED=myBucketName
+```
+
+Place your secret key.json in the following directory:
+```
+src/main/resources/key.json
+```
+
 ## Installation ##
 
 If the jar is included in the project it will automatically connect to google cloud storage. 

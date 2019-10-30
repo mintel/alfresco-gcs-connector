@@ -7,6 +7,7 @@ import java.nio.channels.Channels;
 import java.nio.channels.WritableByteChannel;
 
 import org.alfresco.repo.content.AbstractContentWriter;
+import org.alfresco.repo.content.filestore.FileContentReader;
 import org.alfresco.service.cmr.repository.ContentIOException;
 import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.util.GUID;
@@ -73,6 +74,13 @@ public class GCSContentWriter extends AbstractContentWriter
     @Override
     protected ContentReader createReader() throws ContentIOException
     {
+        if (this.getTempFile() != null)
+        {
+            FileContentReader reader = new FileContentReader(this.getTempFile(), this.getContentUrl());
+            reader.setMimetype(this.getMimetype());
+            reader.setEncoding(this.getEncoding());
+            return reader;
+        }
         return new GCSContentReader(path, contentUrl, bucket);
     }
 
