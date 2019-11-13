@@ -3,10 +3,17 @@
    <modelVersion>4.0.0</modelVersion>
    <groupId>com.mintel</groupId>
    <artifactId>alfresco-gcs-connector</artifactId>
-   <version>1.0-SNAPSHOT</version>
+   <version>1.0.1</version>
    <name>Alfresco GCS connector</name>
    <description>Alfresco Google Cloud Storage connector</description>
    <packaging>jar</packaging>
+
+   <scm>
+      <url>https://github.com/mintel/alfresco-gcs-connector</url>
+      <connection>scm:git@github.com/mintel/alfresco-gcs-connector.git</connection>
+      <tag>1.0.1</tag>
+      <developerConnection>scm:git:git@github.com/mintel/alfresco-gcs-connector.git</developerConnection>
+   </scm>
 
    <properties>
       <!-- Alfresco Maven Plugin version to use -->
@@ -34,7 +41,7 @@
       <acs.debug.port>8888</acs.debug.port>
       <postgres.port>5555</postgres.port>
       <!-- This parameter is only required for those cases in which ACS is not exposed in http://localhost:8080/alfresco (i.e. Windows Docker) -->
-      <test.acs.endpoint.path></test.acs.endpoint.path>
+      <test.acs.endpoint.path />
 
    </properties>
 
