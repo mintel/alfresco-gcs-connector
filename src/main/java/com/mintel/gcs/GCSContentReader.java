@@ -65,7 +65,7 @@ public class GCSContentReader extends AbstractContentReader
     public boolean exists()
     {
         Blob metadata = getMetadata();
-        return metadata != null && metadata.exists();
+        return metadata != null;
     }
 
     /**
@@ -123,7 +123,7 @@ public class GCSContentReader extends AbstractContentReader
 
     /**
      * Gets a blob with just the required metadata (size and last modified date)
-     * 
+     *
      * @return Blob containing only these fields
      */
     private Blob getMetadata()
