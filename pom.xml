@@ -3,7 +3,7 @@
    <modelVersion>4.0.0</modelVersion>
    <groupId>com.mintel</groupId>
    <artifactId>alfresco-gcs-connector</artifactId>
-   <version>1.0.2</version>
+   <version>1.0.3-SNAPSHOT</version>
    <name>Alfresco GCS connector</name>
    <description>Alfresco Google Cloud Storage connector</description>
    <packaging>jar</packaging>
@@ -70,6 +70,13 @@
          <groupId>com.google.cloud</groupId>
          <artifactId>google-cloud-storage</artifactId>
          <version>1.90.0</version>
+      </dependency>
+
+      <!-- Force google client api version -->
+      <dependency>
+          <groupId>com.google.api-client</groupId>
+          <artifactId>google-api-client</artifactId>
+          <version>1.25.0</version>
       </dependency>
 
       <!-- Bring in Alfresco RAD so we get access to AlfrescoTestRunner classes -->
